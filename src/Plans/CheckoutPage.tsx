@@ -174,13 +174,31 @@ export default function CheckoutPage() {
     return () => document.head.removeChild(style);
   }, []);
 
-  if (!plan) {
-    return (
-      <div style={{ background: "#080502", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p style={{ color: "#dddddd", fontFamily: "'DM Sans', sans-serif" }}>No plan selected.</p>
-      </div>
-    );
-  }
+if (!plan) {
+  return (
+    <div style={{ background: "#080502", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
+      <p style={{ color: "#dddddd", fontFamily: "'DM Sans', sans-serif" }}>No plan selected.</p>
+      <button
+        onClick={() => navigate("/", { state: { scrollToPlans: true } })}
+        style={{
+          background: "rgba(214,168,106,0.12)",
+          border: "1px solid rgba(214,168,106,0.3)",
+          borderRadius: 100,
+          color: "#d6a86a",
+          fontSize: 11,
+          fontWeight: 600,
+          letterSpacing: 1.5,
+          textTransform: "uppercase",
+          fontFamily: "'DM Sans', sans-serif",
+          padding: "9px 20px",
+          cursor: "pointer",
+        }}
+      >
+        Choose a Plan →
+      </button>
+    </div>
+  );
+          }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
