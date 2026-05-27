@@ -287,21 +287,46 @@ export default function TrialSignup() {
           </div>
 
           {/* Error / Success message */}
-          {message && (
-            <div style={{
-              padding: "12px 16px",
-              borderRadius: 10,
-              fontSize: 13,
-              fontFamily: "'DM Sans', sans-serif",
-              lineHeight: 1.6,
-              background: status === "error" ? "rgba(239,68,68,0.08)" : "rgba(214,168,106,0.08)",
-              border: `1px solid ${status === "error" ? "rgba(239,68,68,0.25)" : "rgba(214,168,106,0.25)"}`,
-              color: status === "error" ? "#f87171" : "#d6a86a",
-              animation: "success-pop 0.4s ease both",
-            }}>
-              {status === "success" ? "✓ " : "⚠ "}{message}
-            </div>
-          )}
+{message && (
+  <div style={{
+    padding: "12px 16px",
+    borderRadius: 10,
+    fontSize: 13,
+    fontFamily: "'DM Sans', sans-serif",
+    lineHeight: 1.6,
+    background: status === "error" ? "rgba(239,68,68,0.08)" : "rgba(214,168,106,0.08)",
+    border: `1px solid ${status === "error" ? "rgba(239,68,68,0.25)" : "rgba(214,168,106,0.25)"}`,
+    color: status === "error" ? "#f87171" : "#d6a86a",
+    animation: "success-pop 0.4s ease both",
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+  }}>
+    <span>{status === "success" ? "✓ " : "⚠ "}{message}</span>
+
+    {status === "error" && message.toLowerCase().includes("plan") && (
+      <button
+        onClick={() => navigate(-1)}
+        style={{
+          alignSelf: "flex-start",
+          background: "rgba(214,168,106,0.12)",
+          border: "1px solid rgba(214,168,106,0.3)",
+          borderRadius: 100,
+          color: "#d6a86a",
+          fontSize: 11,
+          fontWeight: 600,
+          letterSpacing: 1.5,
+          textTransform: "uppercase",
+          fontFamily: "'DM Sans', sans-serif",
+          padding: "7px 16px",
+          cursor: "pointer",
+        }}
+      >
+        Choose a Plan →
+      </button>
+    )}
+  </div>
+)}
 
           {/* Submit */}
           <button
