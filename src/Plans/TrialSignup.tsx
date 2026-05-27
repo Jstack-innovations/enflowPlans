@@ -306,7 +306,7 @@ export default function TrialSignup() {
 
     {status === "error" && message.toLowerCase().includes("plan") && (
       <button
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/", { state: { scrollToPlans: true } })}
         style={{
           alignSelf: "flex-start",
           background: "rgba(214,168,106,0.12)",
