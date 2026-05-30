@@ -469,7 +469,7 @@ export default function SubscriptionSuccess() {
             className="btn-primary"
             onClick={() => {
   localStorage.removeItem("subscriptionSuccess");
-  window.location.href = "https://admin-artisangrilluxe.vercel.app/";
+  window.location.href = "https://plans.getenflowai.online";
 }}
           >
             Go to Dashboard
