@@ -224,7 +224,7 @@ export default function SubscriptionPage() {
                     background: plan.highlight ? "linear-gradient(160deg, #1a0f07 0%, #0f0804 100%)" : "rgba(255,238,215,0.025)",
                     border: plan.highlight ? "1px solid rgba(214,168,106,0.5)" : hoveredCard === i ? "1px solid rgba(214,168,106,0.25)" : "1px solid rgba(214,168,106,0.1)",
                     borderRadius: 20,
-                    padding: "32px 28px",
+                    padding: "24px 20px",
                     boxShadow: plan.highlight ? "0 0 60px rgba(214,168,106,0.08), inset 0 1px 0 rgba(214,168,106,0.15)" : hoveredCard === i ? "0 20px 60px rgba(0,0,0,0.4)" : "none",
                   }}
                 >
