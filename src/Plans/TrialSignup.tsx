@@ -165,11 +165,17 @@ export default function TrialSignup() {
 
       const data = await res.json();
       
-      if (data.status === "existing") {
-  setStatus("success");
-  setMessage("Welcome back! Redirecting you to upgrade...");
-  setTimeout(() => navigate("/checkout", { state: { plan, user: data.user } }), 1800);
-      } else if (data.status === "new") {
+        if (data.status === "existing") {
+  const expired = new Date(data.user.trial_ends_at) < new Date();
+  if (expired) {
+    setStatus("success");
+    setMessage("Welcome back! Redirecting you to upgrade...");
+    setTimeout(() => navigate("/checkout", { state: { plan, user: data.user } }), 1800);
+  } else {
+    setStatus("error");
+    setMessage("You already have an active trial. Check your email for your login details.");
+  }
+    }    else if (data.status === "new") {
         setStatus("success");
         setMessage("Trial started! Taking you to set up your account...");
         setTimeout(() => navigate("/onboarding", { state: { user: data.user, plan } }), 1800);
