@@ -190,7 +190,7 @@ export default function TrialSignup() {
               <label style={{ fontSize: 10, letterSpacing: 2, textTransform: "uppercase", color: "#666" }}>Full Name</label>
               <input
                 type="text"
-                placeholder="e.g. Adaobi Nwosu"
+                placeholder="e.g. Kendrell Powells"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && handleSubmit()}
@@ -204,7 +204,7 @@ export default function TrialSignup() {
               <label style={{ fontSize: 10, letterSpacing: 2, textTransform: "uppercase", color: "#666" }}>Email</label>
               <input
                 type="email"
-                placeholder="you@yourbusiness.com"
+                placeholder="powells@ccJitters.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && handleSubmit()}
