@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { API_BASE } from "../Config/enflowApi";
+import { Eye, EyeOff } from "lucide-react";
 
 type FormState = "idle" | "loading" | "success" | "error";
 
@@ -19,126 +20,48 @@ const COUNTRIES = [
   { code: "IN", flag: "🇮🇳", dial: "+91" },
 ];
 
+const shimmerStyle: React.CSSProperties = {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  width: "40px",
+  height: "100%",
+  background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)",
+  animation: "enflow-shimmer 2.5s infinite",
+  pointerEvents: "none",
+};
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(214,168,106,0.15)",
+  borderRadius: 10,
+  padding: "13px 16px",
+  color: "#ffffff",
+  fontSize: 14,
+  outline: "none",
+  fontFamily: "inherit",
+  boxSizing: "border-box",
+};
+
 export default function TrialSignup() {
   const navigate = useNavigate();
   const location = useLocation();
   const plan = location.state?.plan ?? null;
 
-  const [name, setName]   = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [name, setName]                     = useState("");
+  const [email, setEmail]                   = useState("");
+  const [phone, setPhone]                   = useState("");
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
-  const [status, setStatus] = useState<FormState>("idle");
-  const [message, setMessage] = useState("");
-  const [focused, setFocused] = useState<string | null>(null);
-  const [trialDays, setTrialDays] = useState<number>(10);
-  
-  useEffect(() => {
-  fetch(`${API_BASE}/settings`)
-    .then(r => r.json())
-    .then(data => setTrialDays(data.trial_days));
-}, []);
+  const [status, setStatus]                 = useState<FormState>("idle");
+  const [message, setMessage]               = useState("");
+  const [trialDays, setTrialDays]           = useState<number>(10);
 
   useEffect(() => {
-    const style = document.createElement("style");
-    style.textContent = `
-      @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
-      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-      body { background: #080502; }
-
-      @keyframes grain {
-        0%,100%{transform:translate(0,0)} 10%{transform:translate(-2%,-3%)} 20%{transform:translate(3%,2%)}
-        30%{transform:translate(-1%,4%)} 40%{transform:translate(4%,-1%)} 50%{transform:translate(-3%,3%)}
-        60%{transform:translate(2%,-4%)} 70%{transform:translate(-4%,2%)} 80%{transform:translate(3%,-2%)} 90%{transform:translate(-2%,4%)}
-      }
-      @keyframes float-orb {
-        0%,100%{transform:translateY(0px) scale(1)} 50%{transform:translateY(-18px) scale(1.03)}
-      }
-      @keyframes fade-up {
-        from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)}
-      }
-      @keyframes shimmer {
-        0%{transform:translateX(-100%)} 100%{transform:translateX(400%)}
-      }
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-      @keyframes success-pop {
-        0%{transform:scale(0.8);opacity:0} 60%{transform:scale(1.05)} 100%{transform:scale(1);opacity:1}
-      }
-
-      .enflow-input {
-        width: 100%;
-        background: rgba(255,238,215,0.03);
-        border: 1px solid rgba(214,168,106,0.15);
-        border-radius: 12px;
-        padding: 16px 20px;
-        color: #ffffff;
-        font-size: 14px;
-        font-family: 'DM Sans', sans-serif;
-        font-weight: 300;
-        outline: none;
-        transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
-        letter-spacing: 0.3px;
-      }
-      .enflow-input::placeholder { color: #555555; }
-      .enflow-input:focus {
-        border-color: rgba(214,168,106,0.5);
-        background: rgba(214,168,106,0.04);
-        box-shadow: 0 0 0 3px rgba(214,168,106,0.06);
-      }
-
-      /* Phone */
-      .phone-wrapper {
-        display: flex;
-        align-items: stretch;
-        gap: 8px;
-      }
-      .phone-country-select {
-        padding: 0 12px;
-        background: rgba(214,168,106,0.08);
-        border: 1px solid rgba(214,168,106,0.18);
-        border-radius: 12px;
-        color: #d6a86a;
-        font-family: 'DM Mono', monospace;
-        font-size: 13px;
-        cursor: pointer;
-        white-space: nowrap;
-        flex-shrink: 0;
-        outline: none;
-        appearance: none;
-        -webkit-appearance: none;
-        transition: border-color 0.3s, background 0.3s;
-        min-height: 52px;
-      }
-      .phone-country-select:focus {
-        border-color: rgba(214,168,106,0.5);
-        background: rgba(214,168,106,0.13);
-      }
-      .phone-country-select option { background: #120a04; color: #dddddd; }
-      .phone-input { flex: 1; }
-
-      .submit-btn {
-        position: relative; overflow: hidden;
-        width: 100%; padding: 16px;
-        border-radius: 100px;
-        background: linear-gradient(135deg, #d6a86a, #b8864a);
-        border: none; color: #0c0602;
-        font-size: 13px; font-weight: 700;
-        letter-spacing: 2px; text-transform: uppercase;
-        cursor: pointer; font-family: 'DM Sans', sans-serif;
-        transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s;
-      }
-      .submit-btn::after {
-        content:''; position:absolute; top:0; left:0; width:40px; height:100%;
-        background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
-        animation: shimmer 2.5s infinite;
-      }
-      .submit-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 32px rgba(214,168,106,0.35); }
-      .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    `;
-    document.head.appendChild(style);
-    return () => document.head.removeChild(style);
+    fetch(`${API_BASE}/settings`)
+      .then(r => r.json())
+      .then(data => setTrialDays(data.trial_days))
+      .catch(() => {});
   }, []);
 
   const handleSubmit = async () => {
@@ -147,10 +70,8 @@ export default function TrialSignup() {
       setMessage("Please fill in all fields.");
       return;
     }
-
     setStatus("loading");
     setMessage("");
-
     try {
       const res = await fetch(`${API_BASE}/trialSignup`, {
         method: "POST",
@@ -162,20 +83,19 @@ export default function TrialSignup() {
           plan: plan?.title ?? null,
         }),
       });
-
       const data = await res.json();
-      
-        if (data.status === "existing") {
-  const expired = new Date(data.user.trial_ends_at) < new Date();
-  if (expired) {
-    setStatus("success");
-    setMessage("Welcome back! Redirecting you to upgrade...");
-    setTimeout(() => navigate("/checkout", { state: { plan, user: data.user } }), 1800);
-  } else {
-    setStatus("error");
-    setMessage("You already have an active trial. Check your email for your login details.");
-  }
-    }    else if (data.status === "new") {
+
+      if (data.status === "existing") {
+        const expired = new Date(data.user.trial_ends_at) < new Date();
+        if (expired) {
+          setStatus("success");
+          setMessage("Welcome back! Redirecting you to upgrade...");
+          setTimeout(() => navigate("/checkout", { state: { plan, user: data.user } }), 1800);
+        } else {
+          setStatus("error");
+          setMessage("You already have an active trial. Check your email for your login details.");
+        }
+      } else if (data.status === "new") {
         setStatus("success");
         setMessage("Trial started! Taking you to set up your account...");
         setTimeout(() => navigate("/onboarding", { state: { user: data.user, plan } }), 1800);
@@ -189,150 +109,205 @@ export default function TrialSignup() {
     }
   };
 
+  const disabled = status === "loading" || status === "success";
+
   return (
-    <div style={{ background: "#080502", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: "#dddddd", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px", position: "relative", overflow: "hidden" }}>
+    <>
+      <style>{`
+        @keyframes enflow-shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(400%); }
+        }
+      `}</style>
 
-      {/* Grain */}
-      <div style={{ position: "fixed", inset: "-50%", zIndex: 1, pointerEvents: "none", backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E")`, animation: "grain 0.5s steps(1) infinite", opacity: 0.4 }} />
+      <div style={{
+        background: "#080502",
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "24px",
+        fontFamily: "system-ui, -apple-system, sans-serif",
+        color: "#dddddd",
+      }}>
+        <div style={{ width: "100%", maxWidth: 420 }}>
 
-      {/* Orbs */}
-      <div style={{ position: "fixed", top: "5%", left: "-5%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(214,168,106,0.08) 0%, transparent 70%)", animation: "float-orb 9s ease-in-out infinite", zIndex: 0 }} />
-      <div style={{ position: "fixed", bottom: "5%", right: "-5%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(249,115,22,0.06) 0%, transparent 70%)", animation: "float-orb 11s ease-in-out infinite reverse", zIndex: 0 }} />
-
-      {/* Card */}
-      <div style={{ position: "relative", zIndex: 2, width: "100%", maxWidth: 460, animation: "fade-up 0.8s ease both" }}>
-
-        {/* Back */}
-        <button onClick={() => navigate(-1)} style={{ background: "none", border: "none", color: "#888", fontSize: 12, letterSpacing: 2, textTransform: "uppercase", fontFamily: "'DM Mono', monospace", cursor: "pointer", marginBottom: 32, display: "flex", alignItems: "center", gap: 8, padding: 0, transition: "color 0.2s" }}
-          onMouseEnter={e => (e.currentTarget.style.color = "#d6a86a")}
-          onMouseLeave={e => (e.currentTarget.style.color = "#888")}
-        >
-          ← Back
-        </button>
-
-        {/* Logo / Brand */}
-        <div style={{ marginBottom: 40 }}>
-          <div style={{ display: "inline-block", fontSize: 10, fontWeight: 600, letterSpacing: 4, textTransform: "uppercase", color: "#d6a86a", fontFamily: "'DM Mono', monospace", border: "1px solid rgba(214,168,106,0.25)", borderRadius: 100, padding: "5px 16px", background: "rgba(214,168,106,0.05)", marginBottom: 20 }}>
-            Enflow · Africa's First Restaurant Intelligence
-          </div>
-          <h1 style={{ fontSize: "clamp(30px, 5vw, 44px)", fontWeight: 300, fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.1, color: "#ffffff", marginBottom: 12 }}>
-            Start Your <em style={{ fontStyle: "italic", color: "#d6a86a" }}>{trialDays}-Day Free</em> Trial
-          </h1>
-          <p style={{ fontSize: 14, color: "#aaaaaa", lineHeight: 1.7, fontWeight: 300 }}>
-            Enter your details below. No credit card needed — full access to Enflow and Zara AI from day one.
-          </p>
-          {plan && (
-            <div style={{ marginTop: 16, display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(214,168,106,0.07)", border: "1px solid rgba(214,168,106,0.2)", borderRadius: 100, padding: "6px 16px" }}>
-              <span style={{ fontSize: 10, color: "#d6a86a", fontFamily: "'DM Mono', monospace", letterSpacing: 2, textTransform: "uppercase" }}>Selected plan</span>
-              <span style={{ fontSize: 11, color: "#ffffff", fontWeight: 600, fontFamily: "'DM Mono', monospace" }}>{plan.title} — {plan.price}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Form */}
-        <div style={{ background: "rgba(255,238,215,0.02)", border: "1px solid rgba(214,168,106,0.1)", borderRadius: 20, padding: "36px 32px", display: "flex", flexDirection: "column", gap: 20 }}>
-
-          {/* Name */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <label style={{ fontSize: 10, letterSpacing: 3, textTransform: "uppercase", color: "#888", fontFamily: "'DM Mono', monospace" }}>Full Name</label>
-            <input
-              className="enflow-input"
-              type="text"
-              placeholder="e.g. Kendrell Powells"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              onFocus={() => setFocused("name")}
-              onBlur={() => setFocused(null)}
-              disabled={status === "loading" || status === "success"}
-            />
-          </div>
-
-          {/* Email */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <label style={{ fontSize: 10, letterSpacing: 3, textTransform: "uppercase", color: "#888", fontFamily: "'DM Mono', monospace" }}>Email Address</label>
-            <input
-              className="enflow-input"
-              type="email"
-              placeholder="e.g. Powells@ccjitters.com"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              onFocus={() => setFocused("email")}
-              onBlur={() => setFocused(null)}
-              disabled={status === "loading" || status === "success"}
-            />
-          </div>
-
-          {/* Phone with country code dropdown */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <label style={{ fontSize: 10, letterSpacing: 3, textTransform: "uppercase", color: "#888", fontFamily: "'DM Mono', monospace" }}>Phone Number</label>
-            <div className="phone-wrapper">
-              <select
-                className="phone-country-select"
-                value={selectedCountry.code}
-                onChange={e => {
-                  const found = COUNTRIES.find(c => c.code === e.target.value);
-                  if (found) setSelectedCountry(found);
-                }}
-                disabled={status === "loading" || status === "success"}
-              >
-                {COUNTRIES.map(c => (
-                  <option key={c.code} value={c.code}>{c.flag} {c.dial}</option>
-                ))}
-              </select>
-              <input
-                className="enflow-input phone-input"
-                type="tel"
-                placeholder="e.g. 800 000 0000"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                onFocus={() => setFocused("phone")}
-                onBlur={() => setFocused(null)}
-                disabled={status === "loading" || status === "success"}
-              />
-            </div>
-          </div>
-
-          {/* Error / Success message */}
-{message && (
-  <div style={{
-    padding: "12px 16px",
-    borderRadius: 10,
-    fontSize: 13,
-    fontFamily: "'DM Sans', sans-serif",
-    lineHeight: 1.6,
-    background: status === "error" ? "rgba(239,68,68,0.08)" : "rgba(214,168,106,0.08)",
-    border: `1px solid ${status === "error" ? "rgba(239,68,68,0.25)" : "rgba(214,168,106,0.25)"}`,
-    color: status === "error" ? "#f87171" : "#d6a86a",
-    animation: "success-pop 0.4s ease both",
-  }}>
-    {status === "success" ? "✓ " : "⚠ "}{message}
-  </div>
-)}
-          
-          {/* Submit */}
+          {/* Back */}
           <button
-            className="submit-btn"
-            onClick={handleSubmit}
-            disabled={status === "loading" || status === "success"}
+            onClick={() => navigate(-1)}
+            style={{ background: "none", border: "none", color: "#555", fontSize: 12, cursor: "pointer", marginBottom: 28, padding: 0, fontFamily: "inherit", letterSpacing: 1 }}
           >
-            {status === "loading" ? (
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-                <span style={{ width: 14, height: 14, border: "2px solid rgba(12,6,2,0.3)", borderTopColor: "#0c0602", borderRadius: "50%", display: "inline-block", animation: "spin 0.7s linear infinite" }} />
-                Checking...
-              </span>
-            ) : status === "success" ? "✓ Redirecting..." : "Start Free Trial →"}
+            ← Back
           </button>
 
-          <p style={{ textAlign: "center", fontSize: 11, color: "#555", letterSpacing: 0.5 }}>
-            By continuing you agree to Enflow's Terms of Service. No spam, ever.
+          {/* Brand */}
+          <div style={{ marginBottom: 32 }}>
+            <div style={{
+              display: "inline-block",
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: 3,
+              textTransform: "uppercase",
+              color: "#d6a86a",
+              border: "1px solid rgba(214,168,106,0.25)",
+              borderRadius: 100,
+              padding: "5px 14px",
+              background: "rgba(214,168,106,0.05)",
+              marginBottom: 16,
+              position: "relative",
+              overflow: "hidden",
+            }}>
+              EnflowAI · Restaurant Intelligence
+              <span style={shimmerStyle} />
+            </div>
+            <h1 style={{ fontSize: 32, fontWeight: 300, lineHeight: 1.15, color: "#ffffff", marginBottom: 8 }}>
+              Start your <span style={{ color: "#d6a86a", fontStyle: "italic" }}>{trialDays}-day free</span> trial.
+            </h1>
+            <p style={{ fontSize: 14, color: "#888", lineHeight: 1.6 }}>
+              No credit card needed — full access from day one.
+            </p>
+            {plan && (
+              <div style={{ marginTop: 12, display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(214,168,106,0.07)", border: "1px solid rgba(214,168,106,0.2)", borderRadius: 100, padding: "5px 14px" }}>
+                <span style={{ fontSize: 10, color: "#d6a86a", letterSpacing: 2, textTransform: "uppercase" }}>Plan</span>
+                <span style={{ fontSize: 11, color: "#ffffff", fontWeight: 600 }}>{plan.title} — {plan.price}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Form */}
+          <div style={{
+            background: "rgba(255,238,215,0.02)",
+            border: "1px solid rgba(214,168,106,0.1)",
+            borderRadius: 16,
+            padding: "28px 24px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+          }}>
+
+            {/* Name */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <label style={{ fontSize: 10, letterSpacing: 2, textTransform: "uppercase", color: "#666" }}>Full Name</label>
+              <input
+                type="text"
+                placeholder="e.g. Adaobi Nwosu"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleSubmit()}
+                disabled={disabled}
+                style={inputStyle}
+              />
+            </div>
+
+            {/* Email */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <label style={{ fontSize: 10, letterSpacing: 2, textTransform: "uppercase", color: "#666" }}>Email</label>
+              <input
+                type="email"
+                placeholder="you@yourbusiness.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleSubmit()}
+                disabled={disabled}
+                style={inputStyle}
+              />
+            </div>
+
+            {/* Phone */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <label style={{ fontSize: 10, letterSpacing: 2, textTransform: "uppercase", color: "#666" }}>Phone</label>
+              <div style={{ display: "flex", gap: 8 }}>
+                <select
+                  value={selectedCountry.code}
+                  onChange={e => {
+                    const found = COUNTRIES.find(c => c.code === e.target.value);
+                    if (found) setSelectedCountry(found);
+                  }}
+                  disabled={disabled}
+                  style={{
+                    background: "rgba(214,168,106,0.08)",
+                    border: "1px solid rgba(214,168,106,0.18)",
+                    borderRadius: 10,
+                    padding: "13px 12px",
+                    color: "#d6a86a",
+                    fontSize: 13,
+                    fontFamily: "inherit",
+                    outline: "none",
+                    cursor: "pointer",
+                    flexShrink: 0,
+                  }}
+                >
+                  {COUNTRIES.map(c => (
+                    <option key={c.code} value={c.code} style={{ background: "#120a04", color: "#dddddd" }}>
+                      {c.flag} {c.dial}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="tel"
+                  placeholder="800 000 0000"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleSubmit()}
+                  disabled={disabled}
+                  style={{ ...inputStyle, flex: 1 }}
+                />
+              </div>
+            </div>
+
+            {/* Message */}
+            {message && (
+              <div style={{
+                padding: "10px 14px",
+                borderRadius: 8,
+                fontSize: 13,
+                lineHeight: 1.5,
+                background: status === "error" ? "rgba(239,68,68,0.08)" : "rgba(214,168,106,0.08)",
+                border: `1px solid ${status === "error" ? "rgba(239,68,68,0.25)" : "rgba(214,168,106,0.25)"}`,
+                color: status === "error" ? "#f87171" : "#d6a86a",
+              }}>
+                {status === "success" ? "✓ " : "⚠ "}{message}
+              </div>
+            )}
+
+            {/* Submit */}
+            <button
+              onClick={handleSubmit}
+              disabled={disabled}
+              style={{
+                width: "100%",
+                padding: "14px",
+                borderRadius: 100,
+                background: disabled
+                  ? "rgba(214,168,106,0.4)"
+                  : "linear-gradient(135deg, #d6a86a, #b8864a)",
+                border: "none",
+                color: "#0c0602",
+                fontSize: 13,
+                fontWeight: 700,
+                letterSpacing: 2,
+                textTransform: "uppercase",
+                cursor: disabled ? "not-allowed" : "pointer",
+                fontFamily: "inherit",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              {status === "loading" ? "Please wait..." : status === "success" ? "✓ Redirecting..." : "Start Free Trial →"}
+              {!disabled && <span style={shimmerStyle} />}
+            </button>
+
+            <p style={{ textAlign: "center", fontSize: 11, color: "#555" }}>
+              Already have an account?{" "}
+              <a href="/login" style={{ color: "#d6a86a", textDecoration: "none" }}>Sign in</a>
+            </p>
+          </div>
+
+          <p style={{ textAlign: "center", marginTop: 20, fontSize: 11, color: "#333" }}>
+            © 2026 jSTack Innovations · ENFLOW
           </p>
         </div>
-
-        {/* Footer note */}
-        <p style={{ textAlign: "center", marginTop: 24, fontSize: 11, color: "#444", letterSpacing: 1, fontFamily: "'DM Mono', monospace" }}>
-          © 2026 jSTack innovaTions · ENFLOW
-        </p>
       </div>
-    </div>
+    </>
   );
 }
