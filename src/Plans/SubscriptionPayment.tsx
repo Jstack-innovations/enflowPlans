@@ -106,7 +106,7 @@ export default function SubscriptionPayment() {
       },
 
       onclose: function () {
-        navigate("/plan", { replace: true });
+        navigate("/", { replace: true });
       },
     });
   }
