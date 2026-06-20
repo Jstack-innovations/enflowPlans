@@ -96,9 +96,16 @@ export default function TrialSignup() {
           setMessage("You already have an active trial. Check your email for your login details.");
         }
       } else if (data.status === "new") {
+        localStorage.setItem("onboarding_token", data.user.onboarding_token);
         setStatus("success");
         setMessage("Trial started! Taking you to set up your account...");
-        setTimeout(() => navigate("/onboarding", { state: { user: data.user, plan } }), 1800);
+        setTimeout(() => navigate("/onboarding", { 
+  state: { 
+    onboarding_token: data.user.onboarding_token,
+    user: data.user, 
+    plan 
+  } 
+}), 1800);
       } else {
         setStatus("error");
         setMessage(data.message ?? "Something went wrong. Please try again.");
