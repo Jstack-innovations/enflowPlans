@@ -20,6 +20,18 @@ const COUNTRIES = [
   { code: "IN", flag: "🇮🇳", dial: "+91" },
 ];
 
+const STEP_ROUTES: Record<number, string> = {
+  1: "/onboarding",
+  2: "/onboarding/step-2",
+  3: "/onboarding/step-3",
+  4: "/onboarding/step-4",
+  5: "/onboarding/step-5",
+  6: "/onboarding/step-6",
+  7: "/onboarding/step-7",
+  8: "/onboarding/step-8",
+  9: "/onboarding/step-9",
+};
+
 const shimmerStyle: React.CSSProperties = {
   position: "absolute",
   top: 0,
@@ -93,8 +105,10 @@ export default function TrialSignup() {
           localStorage.setItem("onboarding_token", data.user.onboarding_token);
           setStatus("success");
           setMessage("Welcome back! Resuming your setup...");
-          const step = data.user.onboarding_step;
-          const target = step && step >= 1 ? `/onboarding/step-${step}` : "/onboarding";
+
+          const nextStep = (data.user.onboarding_step || 0) + 1;
+          const target = STEP_ROUTES[nextStep] || "/onboarding";
+
           setTimeout(() => navigate(target, {
             state: {
               onboarding_token: data.user.onboarding_token,
@@ -332,4 +346,4 @@ export default function TrialSignup() {
       </div>
     </>
   );
-              }
+            }
