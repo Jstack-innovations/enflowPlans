@@ -87,7 +87,20 @@ export default function TrialSignup() {
 
       if (data.status === "existing") {
         const expired = new Date(data.user.trial_ends_at) < new Date();
-        if (expired) {
+        const onboardingIncomplete = data.user.onboarding_step < 9 && data.user.onboarding_token;
+
+        if (onboardingIncomplete) {
+          localStorage.setItem("onboarding_token", data.user.onboarding_token);
+          setStatus("success");
+          setMessage("Welcome back! Resuming your setup...");
+          setTimeout(() => navigate(`/onboarding/step-${data.user.onboarding_step}`, {
+            state: {
+              onboarding_token: data.user.onboarding_token,
+              user: data.user,
+              plan,
+            }
+          }), 1800);
+        } else if (expired) {
           setStatus("success");
           setMessage("Welcome back! Redirecting you to upgrade...");
           setTimeout(() => navigate("/checkout", { state: { plan, user: data.user } }), 1800);
@@ -317,4 +330,4 @@ export default function TrialSignup() {
       </div>
     </>
   );
-}
+                                                 }
