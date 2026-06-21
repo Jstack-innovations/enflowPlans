@@ -248,7 +248,7 @@ if (loading) return <OnboardingLoader />;
 
             <p style={{ textAlign: "center", fontSize: 11, color: "#555", marginBottom: 24 }}>
               Already have an account?{" "}
-              <a href="/login" style={{ color: "#d6a86a", textDecoration: "none" }}>Sign in</a>
+              <a href="https://dashboard.getenflowai.online" style={{ color: "#d6a86a", textDecoration: "none" }}>Sign in</a>
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 9, marginBottom: 20 }}>
