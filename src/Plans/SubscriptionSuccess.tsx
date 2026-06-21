@@ -469,7 +469,7 @@ export default function SubscriptionSuccess() {
             className="btn-primary"
             onClick={() => {
   localStorage.removeItem("subscriptionSuccess");
-  window.location.href = "https://plans.getenflowai.online";
+  window.location.href = "https://dashboard.getenflowai.online";
 }}
           >
             Go to Dashboard
