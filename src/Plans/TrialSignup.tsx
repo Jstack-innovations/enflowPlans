@@ -93,7 +93,9 @@ export default function TrialSignup() {
           localStorage.setItem("onboarding_token", data.user.onboarding_token);
           setStatus("success");
           setMessage("Welcome back! Resuming your setup...");
-          setTimeout(() => navigate(`/onboarding/step-${data.user.onboarding_step}`, {
+          const step = data.user.onboarding_step;
+          const target = step && step >= 1 ? `/onboarding/step-${step}` : "/onboarding";
+          setTimeout(() => navigate(target, {
             state: {
               onboarding_token: data.user.onboarding_token,
               user: data.user,
@@ -330,4 +332,4 @@ export default function TrialSignup() {
       </div>
     </>
   );
-                                                 }
+              }
