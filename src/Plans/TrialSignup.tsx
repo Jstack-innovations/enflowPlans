@@ -335,7 +335,7 @@ export default function TrialSignup() {
 
             <p style={{ textAlign: "center", fontSize: 11, color: "#555" }}>
               Already have an account?{" "}
-              <a href="https://dashboard.getenflowai.online" style={{ color: "#d6a86a", textDecoration: "none" }}>Sign in</a>
+              <a href="https://dashboard.getenflowai.online/login" style={{ color: "#d6a86a", textDecoration: "none" }}>Sign in</a>
             </p>
           </div>
 
