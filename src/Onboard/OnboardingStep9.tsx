@@ -66,7 +66,7 @@ export default function OnboardingStep9() {
     return () => { cancelled = true; };
   }, [loading, onboarding_token]);
 
-  const goToDashboard = () => { window.location.href = "https://dashboard.getenflowai.online"; };
+  const goToDashboard = () => { window.location.href = "https://dashboard.getenflowai.online/login"; };
 const bookCall      = () => window.open("https://calendly.com/enflow/onboarding", "_blank");
 const downloadApp   = () => window.open("https://www.getenflowai.online/app", "_blank");
 const openWhatsApp  = () => window.open("https://wa.me/2347089913116", "_blank");
