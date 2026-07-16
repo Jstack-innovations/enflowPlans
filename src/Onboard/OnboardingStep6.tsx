@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, HelpCircle, LogOut, Check, Monitor, MessageCircle, Share2, Star, Bike, BookOpen } from "lucide-react";
-import { API_BASE } from "../Config/enflowApi";
+import { apiFetch } from "../Config/api";
 import { useOnboardingSession } from "../Hooks/useOnboardingSession";
 import OnboardingLoader from "../Components/OnboardingLoader";
 
@@ -139,21 +139,18 @@ export default function OnboardingStep6() {
       accounting:     tools.accounting.enabled     ? (tools.accounting.selected.length     ? tools.accounting.selected     : ["connected"]) : [],
     };
 
-    try {
-      const res  = await fetch(`${API_BASE}/onboardingTools`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (data.status !== "ok") {
-        setStatus("error"); setErrMsg(data.message ?? "Could not save tools."); return;
-      }
-    } catch {
-      setStatus("error"); setErrMsg("Network error. Check your connection."); return;
-    }
+    const data = await apiFetch("/onboardingTools", {
+  method: "POST",
+  body: JSON.stringify(payload),
+});
 
-    navigate("/onboarding/step-7", { state: { onboarding_token, user, plan } });
+if (!data || data.status !== "ok") {
+  setStatus("error");
+  setErrMsg(data?.message ?? "Could not save tools.");
+  return;
+}
+
+navigate("/onboarding/step-7", { state: { onboarding_token, user, plan } });
   };
   
   const saveAndExit = () => {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { API_BASE } from "../Config/enflowApi";
+import { apiFetch } from "../Config/api";
 import { Eye, EyeOff } from "lucide-react";
 
 type FormState = "idle" | "loading" | "success" | "error";
@@ -70,10 +70,9 @@ export default function TrialSignup() {
   const [trialDays, setTrialDays]           = useState<number>(10);
 
   useEffect(() => {
-    fetch(`${API_BASE}/settings`)
-      .then(r => r.json())
-      .then(data => setTrialDays(data.trial_days))
-      .catch(() => {});
+    apiFetch("/settings").then(data => {
+      if (data) setTrialDays(data.trial_days);
+    });
   }, []);
 
   const handleSubmit = async () => {
@@ -84,64 +83,64 @@ export default function TrialSignup() {
     }
     setStatus("loading");
     setMessage("");
-    try {
-      const res = await fetch(`${API_BASE}/trialSignup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          phone: `${selectedCountry.dial} ${phone}`,
-          plan: plan?.title ?? null,
-        }),
-      });
-      const data = await res.json();
 
-      if (data.status === "existing") {
-        const expired = new Date(data.user.trial_ends_at) < new Date();
-        const onboardingIncomplete = data.user.onboarding_step < 9 && data.user.onboarding_token;
+    const data = await apiFetch("/trialSignup", {
+      method: "POST",
+      body: JSON.stringify({
+        name,
+        email,
+        phone: `${selectedCountry.dial} ${phone}`,
+        plan: plan?.title ?? null,
+      }),
+    });
 
-        if (onboardingIncomplete) {
-          localStorage.setItem("onboarding_token", data.user.onboarding_token);
-          setStatus("success");
-          setMessage("Welcome back! Resuming your setup...");
-
-          const nextStep = (data.user.onboarding_step || 0) + 1;
-          const target = STEP_ROUTES[nextStep] || "/onboarding";
-
-          setTimeout(() => navigate(target, {
-            state: {
-              onboarding_token: data.user.onboarding_token,
-              user: data.user,
-              plan,
-            }
-          }), 1800);
-        } else if (expired) {
-          setStatus("success");
-          setMessage("Welcome back! Redirecting you to upgrade...");
-          setTimeout(() => navigate("/checkout", { state: { plan, user: data.user } }), 1800);
-        } else {
-          setStatus("error");
-          setMessage("You already have an active trial. Check your email for your login details.");
-        }
-      } else if (data.status === "new") {
-        localStorage.setItem("onboarding_token", data.user.onboarding_token);
-        setStatus("success");
-        setMessage("Trial started! Taking you to set up your account...");
-        setTimeout(() => navigate("/onboarding", { 
-  state: { 
-    onboarding_token: data.user.onboarding_token,
-    user: data.user, 
-    plan 
-  } 
-}), 1800);
-      } else {
-        setStatus("error");
-        setMessage(data.message ?? "Something went wrong. Please try again.");
-      }
-    } catch {
+    if (!data) {
       setStatus("error");
       setMessage("Network error. Please check your connection and try again.");
+      return;
+    }
+
+    if (data.status === "existing") {
+      const expired = new Date(data.user.trial_ends_at) < new Date();
+      const onboardingIncomplete = data.user.onboarding_step < 9 && data.user.onboarding_token;
+
+      if (onboardingIncomplete) {
+        localStorage.setItem("onboarding_token", data.user.onboarding_token);
+        setStatus("success");
+        setMessage("Welcome back! Resuming your setup...");
+
+        const nextStep = (data.user.onboarding_step || 0) + 1;
+        const target = STEP_ROUTES[nextStep] || "/onboarding";
+
+        setTimeout(() => navigate(target, {
+          state: {
+            onboarding_token: data.user.onboarding_token,
+            user: data.user,
+            plan,
+          }
+        }), 1800);
+      } else if (expired) {
+        setStatus("success");
+        setMessage("Welcome back! Redirecting you to upgrade...");
+        setTimeout(() => navigate("/checkout", { state: { plan, user: data.user } }), 1800);
+      } else {
+        setStatus("error");
+        setMessage("You already have an active trial. Check your email for your login details.");
+      }
+    } else if (data.status === "new") {
+      localStorage.setItem("onboarding_token", data.user.onboarding_token);
+      setStatus("success");
+      setMessage("Trial started! Taking you to set up your account...");
+      setTimeout(() => navigate("/onboarding", {
+        state: {
+          onboarding_token: data.user.onboarding_token,
+          user: data.user,
+          plan
+        }
+      }), 1800);
+    } else {
+      setStatus("error");
+      setMessage(data.message ?? "Something went wrong. Please try again.");
     }
   };
 
@@ -346,4 +345,4 @@ export default function TrialSignup() {
       </div>
     </>
   );
-            }
+}

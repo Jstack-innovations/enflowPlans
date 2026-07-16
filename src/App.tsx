@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE } from "./Config/enflowApi";
+import { apiFetch } from "./Config/api";
 import "./App.css";
 
 type Plan = {
@@ -92,16 +92,20 @@ export default function SubscriptionPage() {
   const [pageData, setPageData] = useState<PageData | null>(null);
 
   useEffect(() => {
-    Promise.all([
-      fetch(`${API_BASE}/subscriptionContent`).then(r => r.json()),
-      fetch(`${API_BASE}/settings`).then(r => r.json()),
-    ]).then(([content, settings]) => {
-      setPageData({ ...content, trialDays: settings.trial_days });
-    }).catch(err => console.error("Failed to load page content", err));
-  }, []);
+  Promise.all([
+    apiFetch("/subscriptionContent"),
+    apiFetch("/settings"),
+  ]).then(([content, settings]) => {
+    if (!content || !settings) {
+      console.error("Failed to load page content");
+      return;
+    }
+    setPageData({ ...content, trialDays: settings.trial_days });
+  }).catch(err => console.error("Failed to load page content", err));
+}, []);
 
   const handleCTA = (plan: Plan) => {
-    if (plan.isContact) { window.open("mailto:support@artisan.com", "_blank"); return; }
+    if (plan.isContact) { window.open("mailto:hello@getenflowai.online", "_blank"); return; }
     if (plan.trialEnabled) {
       navigate("/trial-signup", { state: { plan } });
     } else {

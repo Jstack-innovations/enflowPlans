@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, HelpCircle, LogOut, Copy, Check, Plus, Trash2, Users } from "lucide-react";
-import { API_BASE } from "../Config/enflowApi";
+import { apiFetch } from "../Config/api";
 import { useOnboardingSession } from "../Hooks/useOnboardingSession";
 import OnboardingLoader from "../Components/OnboardingLoader";
 
@@ -95,21 +95,18 @@ export default function OnboardingStep7() {
       team: validRows.map(m => ({ email: m.email.trim(), role: m.role.trim() })),
     };
 
-    try {
-      const res  = await fetch(`${API_BASE}/onboardingTeam`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (data.status !== "ok") {
-        setStatus("error"); setErrMsg(data.message ?? "Could not save team."); return;
-      }
-    } catch {
-      setStatus("error"); setErrMsg("Network error. Check your connection."); return;
-    }
+ const data = await apiFetch("/onboardingTeam", {
+  method: "POST",
+  body: JSON.stringify(payload),
+});
 
-    navigate("/onboarding/step-8", { state: { onboarding_token, user, plan } });
+if (!data || data.status !== "ok") {
+  setStatus("error");
+  setErrMsg(data?.message ?? "Could not save team.");
+  return;
+}
+
+navigate("/onboarding/step-8", { state: { onboarding_token, user, plan } });
   };
   
   const saveAndExit = () => {

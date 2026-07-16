@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, HelpCircle, LogOut, Zap, Smile, TrendingUp } from "lucide-react";
-import { API_BASE } from "../Config/enflowApi";
+import { apiFetch } from "../Config/api";
 import { useOnboardingSession } from "../Hooks/useOnboardingSession";
 import OnboardingLoader from "../Components/OnboardingLoader";
 
@@ -86,24 +86,16 @@ export default function OnboardingStep1() {
     setAdvancing(true);
     setErrMsg("");
 
-    try {
-      const res  = await fetch(`${API_BASE}/onboarding`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ onboarding_token }),
-      });
-      const data = await res.json();
+    const data = await apiFetch("/onboarding", {
+  method: "POST",
+  body: JSON.stringify({ onboarding_token }),
+});
 
-      if (data.status !== "ok") {
-        setErrMsg(data.message ?? "Could not continue. Please try again.");
-        setAdvancing(false);
-        return;
-      }
-    } catch {
-      setErrMsg("Network error. Check your connection.");
-      setAdvancing(false);
-      return;
-    }
+if (!data || data.status !== "ok") {
+  setErrMsg(data?.message ?? "Could not continue. Please try again.");
+  setAdvancing(false);
+  return;
+}
 
     navigate("/onboarding/step-2", { state: { onboarding_token, user, plan } });
   };

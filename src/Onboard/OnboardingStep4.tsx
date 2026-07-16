@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, HelpCircle, LogOut, UploadCloud, X } from "lucide-react";
-import { API_BASE } from "../Config/enflowApi";
+import { apiFetch } from "../Config/api";
 import { useOnboardingSession } from "../Hooks/useOnboardingSession";
 import OnboardingLoader from "../Components/OnboardingLoader";
 
@@ -79,32 +79,30 @@ export default function OnboardingStep4() {
 
     setStatus("loading"); setErrMsg("");
 
-    try {
-      const form = new FormData();
-      form.append("onboarding_token", onboarding_token);
-      form.append("business_name", businessName.trim());
-      form.append("country", country.trim());
-      form.append("currency", currency.trim());
-      form.append("num_locations", String(parseInt(numLocations) || 1));
-      form.append("num_staff", String(parseStaff(numStaff)));
-      if (website.trim()) form.append("website", website.trim());
-      if (logoFile) form.append("logo", logoFile);
+    const form = new FormData();
+form.append("onboarding_token", onboarding_token);
+form.append("business_name", businessName.trim());
+form.append("country", country.trim());
+form.append("currency", currency.trim());
+form.append("num_locations", String(parseInt(numLocations) || 1));
+form.append("num_staff", String(parseStaff(numStaff)));
+if (website.trim()) form.append("website", website.trim());
+if (logoFile) form.append("logo", logoFile);
 
-      const res = await fetch(`${API_BASE}/onboardingBusiness`, {
-        method: "POST",
-        body: form,
-      });
-      const data = await res.json();
-      if (data.status !== "ok") {
-        setStatus("error"); setErrMsg(data.message ?? "Could not save business details."); return;
-      }
-    } catch {
-      setStatus("error"); setErrMsg("Network error. Check your connection."); return;
-    }
+const data = await apiFetch("/onboardingBusiness", {
+  method: "POST",
+  body: form,
+});
 
-    navigate("/onboarding/step-5", {
-      state: { onboarding_token, user, plan },
-    });
+if (!data || data.status !== "ok") {
+  setStatus("error");
+  setErrMsg(data?.message ?? "Could not save business details.");
+  return;
+}
+
+navigate("/onboarding/step-5", {
+  state: { onboarding_token, user, plan },
+});
   };
   
   const saveAndExit = () => {

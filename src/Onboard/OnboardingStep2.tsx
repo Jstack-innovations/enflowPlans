@@ -4,7 +4,7 @@ import {
   ChevronLeft, ChevronRight, HelpCircle, LogOut,
   Eye, EyeOff, Lock, CheckCircle2, User, Mail, Phone,
 } from "lucide-react";
-import { API_BASE } from "../Config/enflowApi";
+import { apiFetch } from "../Config/api";
 import { useOnboardingSession } from "../Hooks/useOnboardingSession";
 import OnboardingLoader from "../Components/OnboardingLoader";
 
@@ -64,26 +64,19 @@ export default function OnboardingStep2() {
 
     setStatus("loading"); setErrMsg("");
 
-    try {
-      const res = await fetch(`${API_BASE}/onboardingSetPassword`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ onboarding_token, password }),
-      });
-      const data = await res.json();
+const data = await apiFetch("/onboardingSetPassword", {
+  method: "POST",
+  body: JSON.stringify({ onboarding_token, password }),
+});
 
-      if (data.status === "ok") {
-        navigate("/onboarding/step-3", {
-          state: { onboarding_token, user, plan, already_verified: data.already_verified ?? false },
-        });
-      } else {
-        setStatus("error");
-        setErrMsg(data.message ?? "Something went wrong.");
-      }
-    } catch {
-      setStatus("error");
-      setErrMsg("Network error. Check your connection.");
-    }
+if (data && data.status === "ok") {
+  navigate("/onboarding/step-3", {
+    state: { onboarding_token, user, plan, already_verified: data.already_verified ?? false },
+  });
+} else {
+  setStatus("error");
+  setErrMsg(data?.message ?? "Something went wrong.");
+}
   };
   
   const saveAndExit = () => {

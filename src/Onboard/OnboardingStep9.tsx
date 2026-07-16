@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { HelpCircle, LogOut, Upload, MessageCircle, Zap, UserPlus, Compass, Phone, Smartphone, MessageSquareText, PartyPopper } from "lucide-react";
-import { API_BASE } from "../Config/enflowApi";
+import { apiFetch } from "../Config/api";
 import { useOnboardingSession } from "../Hooks/useOnboardingSession";
 import OnboardingLoader from "../Components/OnboardingLoader";
 
@@ -34,34 +34,25 @@ export default function OnboardingStep9() {
 
     let cancelled = false;
 
-    (async () => {
-      try {
-        const res  = await fetch(`${API_BASE}/onboardingFinalize`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ onboarding_token }),
-        });
-        const data = await res.json();
+(async () => {
+  const data = await apiFetch("/onboardingFinalize", {
+    method: "POST",
+    body: JSON.stringify({ onboarding_token }),
+  });
 
-        if (cancelled) return;
+  if (cancelled) return;
 
-        if (data.status !== "ok") {
-          setErrMsg(data.message ?? "Could not activate your account.");
-          setActivating(false);
-          return;
-        }
+  if (!data || data.status !== "ok") {
+    setErrMsg(data?.message ?? "Could not activate your account.");
+    setActivating(false);
+    return;
+  }
 
-        setActivated(true);
-        setActivating(false);
-        setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 2600);
-      } catch {
-        if (!cancelled) {
-          setErrMsg("Network error. Check your connection.");
-          setActivating(false);
-        }
-      }
-    })();
+  setActivated(true);
+  setActivating(false);
+  setShowConfetti(true);
+  setTimeout(() => setShowConfetti(false), 2600);
+})();
 
     return () => { cancelled = true; };
   }, [loading, onboarding_token]);

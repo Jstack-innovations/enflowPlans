@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, HelpCircle, LogOut } from "lucide-react";
-import { API_BASE } from "../Config/enflowApi";
+import { apiFetch } from "../Config/api";
 import { useOnboardingSession } from "../Hooks/useOnboardingSession";
 import OnboardingLoader from "../Components/OnboardingLoader";
 
@@ -107,24 +107,22 @@ export default function OnboardingStep5() {
       setStatus("error"); setErrMsg("Session expired. Please go back and start again."); return;
     }
     setStatus("loading"); setErrMsg("");
-    try {
-      const res = await fetch(`${API_BASE}/onboardingBusinessType`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          onboarding_token,
-          business_type:     selectedType,
-          business_subtypes: selectedSubtypes.length > 0 ? selectedSubtypes : null,
-        }),
-      });
-      const data = await res.json();
-      if (data.status !== "ok") {
-        setStatus("error"); setErrMsg(data.message ?? "Could not save business type."); return;
-      }
-    } catch {
-      setStatus("error"); setErrMsg("Network error. Check your connection."); return;
-    }
-    navigate("/onboarding/step-6", { state: { onboarding_token, user, plan } });
+const data = await apiFetch("/onboardingBusinessType", {
+  method: "POST",
+  body: JSON.stringify({
+    onboarding_token,
+    business_type:     selectedType,
+    business_subtypes: selectedSubtypes.length > 0 ? selectedSubtypes : null,
+  }),
+});
+
+if (!data || data.status !== "ok") {
+  setStatus("error");
+  setErrMsg(data?.message ?? "Could not save business type.");
+  return;
+}
+
+navigate("/onboarding/step-6", { state: { onboarding_token, user, plan } });
   };
   
   const saveAndExit = () => {

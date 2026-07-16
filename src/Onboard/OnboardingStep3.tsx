@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, HelpCircle, LogOut, CheckCircle2 } from "lucide-react";
-import { API_BASE } from "../Config/enflowApi";
+import { apiFetch } from "../Config/api";
 import { useOnboardingSession } from "../Hooks/useOnboardingSession";
 import OnboardingLoader from "../Components/OnboardingLoader";
 
@@ -41,25 +41,19 @@ export default function OnboardingStep3() {
     if (resendCooldown > 0 || resending || !onboarding_token) return;
     setResending(true);
     setErrMsg("");
-    try {
-      const res = await fetch(`${API_BASE}/onboardingResendOtp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ onboarding_token }),
-      });
-      const data = await res.json();
-      if (data.status === "ok") {
-        setResendCooldown(60);
-        setDigits(Array(OTP_LENGTH).fill(""));
-        inputsRef.current[0]?.focus();
-      } else {
-        setErrMsg(data.message ?? "Could not resend code.");
-      }
-    } catch {
-      setErrMsg("Network error. Could not resend code.");
-    } finally {
-      setResending(false);
-    }
+const data = await apiFetch("/onboardingResendOtp", {
+  method: "POST",
+  body: JSON.stringify({ onboarding_token }),
+});
+
+if (data && data.status === "ok") {
+  setResendCooldown(60);
+  setDigits(Array(OTP_LENGTH).fill(""));
+  inputsRef.current[0]?.focus();
+} else {
+  setErrMsg(data?.message ?? "Could not resend code.");
+}
+setResending(false);
   };
 
   // If Step2 already told us this account is verified (re-submit case),
@@ -112,29 +106,22 @@ export default function OnboardingStep3() {
 
     setStatus("loading"); setErrMsg("");
 
-    try {
-      const res = await fetch(`${API_BASE}/onboardingVerifyOtp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ onboarding_token, otp }),
-      });
-      const data = await res.json();
+    const data = await apiFetch("/onboardingVerifyOtp", {
+  method: "POST",
+  body: JSON.stringify({ onboarding_token, otp }),
+});
 
-      if (data.status === "ok") {
-        setStatus("success");
-        navigate("/onboarding/step-4", {
-          state: { onboarding_token, user, plan },
-        });
-      } else {
-        setStatus("error");
-        setErrMsg(data.message ?? "Incorrect code. Please try again.");
-        setDigits(Array(OTP_LENGTH).fill(""));
-        inputsRef.current[0]?.focus();
-      }
-    } catch {
-      setStatus("error");
-      setErrMsg("Network error. Check your connection.");
-    }
+if (data && data.status === "ok") {
+  setStatus("success");
+  navigate("/onboarding/step-4", {
+    state: { onboarding_token, user, plan },
+  });
+} else {
+  setStatus("error");
+  setErrMsg(data?.message ?? "Incorrect code. Please try again.");
+  setDigits(Array(OTP_LENGTH).fill(""));
+  inputsRef.current[0]?.focus();
+}
   };
   
   const saveAndExit = () => {
@@ -177,6 +164,20 @@ export default function OnboardingStep3() {
           color: #999;
           line-height: 1.6;
         }
+        
+        .ob3-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: rgba(214,168,106,0.06);
+  border: 1px solid rgba(214,168,106,0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #d6a86a;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
 
         .ob3-error {
           padding: 10px 14px; border-radius: 8px; font-size: 12px; line-height: 1.5;
@@ -302,6 +303,10 @@ export default function OnboardingStep3() {
                 />
               ))}
             </div>
+            
+<div className="ob3-tip">
+  ⚠ Didn't receive the code? Please check your inbox and spam/junk folder before requesting a resend.
+</div>
 
             {/* Error */}
             {errMsg && <div className="ob3-error" style={{ marginBottom: 16 }}>⚠ {errMsg}</div>}

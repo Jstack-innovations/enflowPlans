@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { API_BASE } from "../Config/enflowApi";
+import { apiFetch } from "../Config/api";
 
 interface OnboardingUser {
   id: number;
@@ -49,39 +49,37 @@ export function useOnboardingSession(currentStep: number): UseOnboardingSessionR
       return;
     }
 
-    fetch(`${API_BASE}/onboardingStatus`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ onboarding_token: token }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.status !== "ok") {
-          localStorage.removeItem("onboarding_token");
-          navigate("/trial-signup", { replace: true });
-          return;
-        }
+    apiFetch("/onboardingStatus", {
+  method: "POST",
+  body: JSON.stringify({ onboarding_token: token }),
+})
+  .then(data => {
+    if (!data || data.status !== "ok") {
+      localStorage.removeItem("onboarding_token");
+      navigate("/trial-signup", { replace: true });
+      return;
+    }
 
-        setUser(data.user);
-        setPlan(data.plan);
-        setOnboardingToken(token);
+    setUser(data.user);
+    setPlan(data.plan);
+    setOnboardingToken(token);
 
-        const nextStep = (data.onboarding_step || 0) + 1;
+    const nextStep = (data.onboarding_step || 0) + 1;
 
-        if (nextStep !== currentStep && STEP_ROUTES[nextStep]) {
-          navigate(STEP_ROUTES[nextStep], {
-            replace: true,
-            state: { onboarding_token: token, user: data.user, plan: data.plan },
-          });
-          return;
-        }
-
-        setLoading(false);
-      })
-      .catch(() => {
-        localStorage.removeItem("onboarding_token");
-        navigate("/trial-signup", { replace: true });
+    if (nextStep !== currentStep && STEP_ROUTES[nextStep]) {
+      navigate(STEP_ROUTES[nextStep], {
+        replace: true,
+        state: { onboarding_token: token, user: data.user, plan: data.plan },
       });
+      return;
+    }
+
+    setLoading(false);
+  })
+  .catch(() => {
+    localStorage.removeItem("onboarding_token");
+    navigate("/trial-signup", { replace: true });
+  });
   }, [location.pathname]);
 
   return { user, plan, onboarding_token, loading };
